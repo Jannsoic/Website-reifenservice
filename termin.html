@@ -1,32 +1,71 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Termin vereinbaren – Reifenservice Schmalkalden</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Termin buchen – Reifenservice</title>
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<link rel="stylesheet" href="style.css">
+<style>
+body { font-family: 'Segoe UI', sans-serif; margin:0; background:#111; color:#eee;}
+header { background:#202020; padding:1rem; text-align:center;}
+nav a { color:#fff; margin:0 10px; text-decoration:none; }
+nav a:hover { color:#ffcc00;}
+.container { max-width:900px; margin:auto; padding:2rem;}
+.tabs { display:flex; justify-content:center; gap:2rem; margin-bottom:2rem; }
+.tab { cursor:pointer; padding:0.5rem 1rem; border-radius:8px; background:#222; transition:0.3s; }
+.tab.active { background:#ffcc00; color:#111;}
+.tab-content { display:none; background:#1e1e1e; padding:2rem; border-radius:10px; }
+.tab-content.active { display:block;}
+label { display:block; margin-top:1rem;}
+input, select, textarea, button { width:100%; padding:0.7rem; margin-top:0.3rem; border-radius:6px; border:none; }
+input, select, textarea { background:#333; color:#eee;}
+button { background:#ffcc00; color:#111; font-weight:bold; cursor:pointer; margin-top:1rem; }
+button:hover { background:#e6b800;}
+.calendar { display:flex; flex-wrap:wrap; gap:10px; margin-top:1rem;}
+.day { width:40px; height:40px; display:flex; align-items:center; justify-content:center; background:#333; border-radius:6px; cursor:pointer; transition:0.3s; }
+.day:hover { background:#ffcc00; color:#111;}
+.day.disabled { background:#555; cursor:not-allowed; color:#888;}
+.time { display:flex; flex-wrap:wrap; gap:10px; margin-top:1rem;}
+.time-slot { padding:0.5rem 1rem; background:#333; border-radius:6px; cursor:pointer; transition:0.3s;}
+.time-slot:hover { background:#ffcc00; color:#111;}
+.time-slot.booked { background:red; cursor:not-allowed; color:#fff;}
+.feedback { margin-top:1rem; text-align:center;}
+</style>
 </head>
 <body>
-  <header>
-    <h1 data-aos="fade-down">Termin vereinbaren</h1>
-    <nav>
-      <a href="index.html">Start</a>
-      <a href="preise.html">Preise</a>
-      <a href="equipment.html">Equipment</a>
-      <a href="kontakt.html">Kontakt</a>
-    </nav>
-  </header>
+<header>
+  <h1>Termin buchen – Reifenservice Schmalkalden</h1>
+  <nav>
+    <a href="index.html">Start</a>
+    <a href="preise.html">Preise</a>
+    <a href="equipment.html">Equipment</a>
+  </nav>
+</header>
 
-  <section class="termin" data-aos="fade-up">
+<div class="container" data-aos="fade-up">
+  <div class="tabs">
+    <div class="tab active" data-tab="buchung">Termin vereinbaren</div>
+    <div class="tab" data-tab="oeffnungszeiten">Öffnungszeiten</div>
+  </div>
+
+  <div id="buchung" class="tab-content active">
     <form id="terminForm">
       <label>Voller Name*</label>
       <input type="text" id="name" required>
-
+      
       <label>Reifengröße*</label>
-      <input type="text" id="groesse" placeholder="z. B. 225/45 R17" required>
+      <select id="groesse" required>
+        <option value="">Bitte wählen...</option>
+        <option value="15">15 Zoll</option>
+        <option value="16">16 Zoll</option>
+        <option value="17">17 Zoll</option>
+        <option value="18">18 Zoll</option>
+        <option value="19">19 Zoll</option>
+        <option value="20">20 Zoll</option>
+      </select>
 
-      <label>Felgenart*</label>
+      <label>Felgentyp*</label>
       <select id="felge" required>
         <option value="">Bitte wählen...</option>
         <option value="Stahl">Stahl</option>
@@ -34,19 +73,143 @@
       </select>
 
       <label>Nachricht</label>
-      <textarea id="nachricht" placeholder="z. B. Bitte Termin am Samstagvormittag" rows="4"></textarea>
+      <textarea id="nachricht" rows="3" placeholder="Optional"></textarea>
 
       <label>Kontakt (E-Mail oder Telefonnummer)*</label>
       <input type="text" id="kontaktinfo" required>
 
-      <button type="submit" class="btn">Termin absenden</button>
-    </form>
-    <p id="feedback" class="hidden">Nachricht wird gesendet...</p>
-  </section>
+      <label>Datum*</label>
+      <div class="calendar" id="calendar"></div>
 
-  <footer>
-    <p>© 2025 Reifenservice Schmalkalden</p>
-  </footer>
+      <label>Uhrzeit*</label>
+      <div class="time" id="timeSlots"></div>
+
+      <button type="submit">Termin absenden</button>
+    </form>
+    <div id="feedback" class="feedback"></div>
+  </div>
+
+  <div id="oeffnungszeiten" class="tab-content">
+    <h3>Öffnungszeiten</h3>
+    <p>Montag bis Freitag: 15:00 - 20:00 Uhr</p>
+    <p>Samstag & Sonntag: 10:00 - 20:00 Uhr</p>
+  </div>
+</div>
+
+<script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script>
+AOS.init({duration:800, once:true});
+
+// Tabs
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(tc=>tc.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.tab).classList.add('active');
+  });
+});
+
+// Kalender erzeugen
+const calendarEl = document.getElementById('calendar');
+const timeEl = document.getElementById('timeSlots');
+const today = new Date();
+today.setHours(0,0,0,0);
+let selectedDate = null;
+
+// Dummy belegte Termine (Demo)
+const booked = {
+  // 'YYYY-MM-DD': [hours]
+  '2025-11-11':[15,16],
+  '2025-11-12':[18],
+};
+
+function generateCalendar(){
+  calendarEl.innerHTML='';
+  const start = new Date(today);
+  start.setDate(start.getDate()+1); // ab morgen
+  for(let i=0;i<14;i++){ // 2 Wochen
+    const day = new Date(start);
+    day.setDate(start.getDate()+i);
+    const dayEl = document.createElement('div');
+    dayEl.className='day';
+    dayEl.textContent=day.getDate();
+    dayEl.dataset.date=day.toISOString().split('T')[0];
+    dayEl.addEventListener('click', ()=>{
+      document.querySelectorAll('.day').forEach(d=>d.classList.remove('selected'));
+      dayEl.classList.add('selected');
+      selectedDate=dayEl.dataset.date;
+      generateTimeSlots(selectedDate);
+    });
+    calendarEl.appendChild(dayEl);
+  }
+}
+
+function generateTimeSlots(date){
+  timeEl.innerHTML='';
+  const dt = new Date(date);
+  const dayOfWeek = dt.getDay(); // 0=So
+  let startHour, endHour;
+  if(dayOfWeek>=1 && dayOfWeek<=5){ startHour=15; endHour=20;} // Mo-Fr
+  else{ startHour=10; endHour=20;} // Sa-So
+  for(let h=startHour; h<=endHour; h++){
+    const slot = document.createElement('div');
+    slot.className='time-slot';
+    slot.textContent=h+":00";
+    slot.dataset.hour=h;
+    if(booked[date] && booked[date].includes(h)) slot.classList.add('booked');
+    slot.addEventListener('click', ()=>{
+      if(slot.classList.contains('booked')) return;
+      document.querySelectorAll('.time-slot').forEach(s=>s.classList.remove('selected'));
+      slot.classList.add('selected');
+    });
+    timeEl.appendChild(slot);
+  }
+}
+
+generateCalendar();
+
+// Form Submission (Telegram)
+const BOT_TOKEN = "DEIN_BOT_TOKEN";
+const CHAT_ID = "DEINE_CHAT_ID";
+document.getElementById('terminForm').addEventListener('submit', async e=>{
+  e.preventDefault();
+  const name=document.getElementById('name').value;
+  const groesse=document.getElementById('groesse').value;
+  const felge=document.getElementById('felge').value;
+  const nachricht=document.getElementById('nachricht').value;
+  const kontakt=document.getElementById('kontaktinfo').value;
+  const timeSlot=document.querySelector('.time-slot.selected');
+  if(!selectedDate || !timeSlot){ alert('Bitte Datum und Uhrzeit wählen'); return;}
+  const datum=selectedDate;
+  const stunde=timeSlot.dataset.hour;
+
+  const msg = `
+🛞 Neuer Termin:
+👤 ${name}
+📏 Reifengröße: ${groesse} Zoll
+⚙️ Felge: ${felge}
+📅 Datum: ${datum} ${stunde}:00
+💬 Nachricht: ${nachricht}
+📞 Kontakt: ${kontakt}
+`;
+
+  try{
+    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({chat_id:CHAT_ID,text:msg,parse_mode:'Markdown'})
+    });
+    document.getElementById('feedback').textContent='Termin erfolgreich gesendet ✅';
+    form.reset();
+    generateTimeSlots(selectedDate); // Refresh
+  }catch(err){
+    document.getElementById('feedback').textContent='Fehler beim Senden ❌';
+  }
+});
+</script>
+</body>
+</html>
 
   <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
   <script src="script.js"></script>
