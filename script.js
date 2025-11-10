@@ -4,8 +4,8 @@ AOS.init({
 });
 
 // Telegram-Konfiguration
-const BOT_TOKEN = "HIER_DEIN_TELEGRAM_BOT_TOKEN";
-const CHAT_ID = "HIER_DEINE_CHAT_ID";
+const BOT_TOKEN = "8582377442:AAGTfHyAYvOIt8jp7ffq78Xga4gmI3F0QPQ";
+const CHAT_ID = "6454892668";
 
 const form = document.getElementById("terminForm");
 if (form) {
