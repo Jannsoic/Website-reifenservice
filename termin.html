@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Termin vereinbaren – Reifenservice Schmalkalden</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+</head>
+<body>
+  <header>
+    <h1 data-aos="fade-down">Termin vereinbaren</h1>
+    <nav>
+      <a href="index.html">Start</a>
+      <a href="preise.html">Preise</a>
+      <a href="equipment.html">Equipment</a>
+      <a href="kontakt.html">Kontakt</a>
+    </nav>
+  </header>
+
+  <section class="termin" data-aos="fade-up">
+    <form id="terminForm">
+      <label>Voller Name*</label>
+      <input type="text" id="name" required>
+
+      <label>Reifengröße*</label>
+      <input type="text" id="groesse" placeholder="z. B. 225/45 R17" required>
+
+      <label>Felgenart*</label>
+      <select id="felge" required>
+        <option value="">Bitte wählen...</option>
+        <option value="Stahl">Stahl</option>
+        <option value="Alu">Alu</option>
+      </select>
+
+      <label>Nachricht</label>
+      <textarea id="nachricht" placeholder="z. B. Bitte Termin am Samstagvormittag" rows="4"></textarea>
+
+      <label>Kontakt (E-Mail oder Telefonnummer)*</label>
+      <input type="text" id="kontaktinfo" required>
+
+      <button type="submit" class="btn">Termin absenden</button>
+    </form>
+    <p id="feedback" class="hidden">Nachricht wird gesendet...</p>
+  </section>
+
+  <footer>
+    <p>© 2025 Reifenservice Schmalkalden</p>
+  </footer>
+
+  <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
